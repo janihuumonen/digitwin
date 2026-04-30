@@ -1,7 +1,7 @@
 # IoT digital twin
 
 ## Description
-**Digital twin of a fish tank**
+### **Digital twin of a fish tank**
 - Raspberry Pi Pico measures water level and temperature.
 - Deno HTTP/WebSocket server authenticates and relays data.
 - Unity3D mirrors the fish tank state using the telemetry.
