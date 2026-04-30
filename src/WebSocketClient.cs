@@ -4,36 +4,36 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Globalization;
 
 
 [Serializable]
 public class SensorPayload
 {
-    public string token;
     public string height;
     public string temp;
 }
 
 public class SensorValues
 {
-    public string token;
     public float height;
     public float temp;
 
-    public SensorValues Copy() => MemberwiseClone();
+    public SensorValues Copy() => (SensorValues) MemberwiseClone();
 
     public static SensorValues FromJSON(string json)
     {
         var payload = JsonUtility.FromJson<SensorPayload>(json);
         return new SensorValues {
-            token = payload.token,
             height = payload.height switch { // map "lo", "mid", "hi" to scale 0..1
                 "lo"  => 0.2f,
                 "mid" => 0.5f,
                 "hi"  => 0.9f,
                 _     => 0.5f },
             temp = float.TryParse(
-                payload.temp.Replace(" C", "").Trim(), // parse "15 C" -> 15
+                payload.temp.Replace(" C", "").Trim(), // parse "15.0 C" -> 15.0
+                NumberStyles.Any,
+                CultureInfo.InvariantCulture,
                 out var t) ? t : 0f
         };
     }
@@ -61,8 +61,7 @@ public class WebSocketClient : MonoBehaviour
     [SerializeField] private ParticleSystem bubblesObject;
     [SerializeField] private int interpolationFramesMax = 240;
     public float defaultWaterLevel = 0.8f;
-    public float defaultBubbles = 20;
-    // TODO: how are iMax,defH,defT set?
+    public float defaultBubbles = 20f;
 
 
     // Start is called before the first frame update
@@ -70,7 +69,6 @@ public class WebSocketClient : MonoBehaviour
     {
         // Initialize with default values
         oldValues = newValues = currentValues = new SensorValues {
-            token = "",
             height = defaultWaterLevel,
             temp = defaultBubbles
         };
